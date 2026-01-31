@@ -1,6 +1,6 @@
 # 更新日誌
 
-- 1.1.0 (2026/01/31)
+- 0.2.0 (2026/01/31)
 
   - 重構內容腳本程式碼結構，提高可維護性
     - 將邏輯拆分為獨立函式：`getPromptFromUrl`、`findInputBox`、`findSendButton`、`setInputValue`、`waitForButtonReady`、`sendWithEnter`
@@ -9,7 +9,7 @@
     - 新增 `isButtonUsable` 輔助函式以簡化按鈕狀態檢查
     - 改善程式碼流程，減少巢狀結構
 
-- 1.0.0 (2026/01/31)
+- 0.1.0 (2026/01/31)
 
   - 初始版本發布
   - Flow Launcher 與 Google Gemini 整合的 Chrome/Edge 擴充功能

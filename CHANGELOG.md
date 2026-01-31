@@ -1,6 +1,6 @@
 # Changelog
 
-- 1.1.0 (2026/01/31)
+- 0.2.0 (2026/01/31)
 
   - Refactor content script code structure for better maintainability
     - Extract logic into independent functions: `getPromptFromUrl`, `findInputBox`, `findSendButton`, `setInputValue`, `waitForButtonReady`, `sendWithEnter`
@@ -9,7 +9,7 @@
     - Add `isButtonUsable` helper function to simplify button state checks
     - Improve code flow and reduce nesting structure
 
-- 1.0.0 (2026/01/31)
+- 0.1.0 (2026/01/31)
 
   - Initial release
   - Chrome/Edge extension for Flow Launcher integration with Google Gemini
