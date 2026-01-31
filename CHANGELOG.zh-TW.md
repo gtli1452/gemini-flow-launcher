@@ -7,6 +7,14 @@
 
 ## [未發布]
 
+### 變更
+- 重構內容腳本程式碼結構，提高可維護性
+  - 將邏輯拆分為獨立函式：`getPromptFromUrl`、`findInputBox`、`findSendButton`、`setInputValue`、`waitForButtonReady`、`sendWithEnter`
+  - 將按鈕選擇器與日誌前綴提取為常數（`SEND_BUTTON_SELECTORS`、`LOG_PREFIX`）
+  - 使用模板字串統一日誌格式
+  - 新增 `isButtonUsable` 輔助函式以簡化按鈕狀態檢查
+  - 改善程式碼流程，減少巢狀結構
+
 ### 新增
 - 初始化更新日誌
 

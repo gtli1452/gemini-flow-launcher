@@ -8,21 +8,25 @@
 *   **自動填入與送出**：讀取 URL 中的 `prompt` 參數，自動填入 Gemini 輸入框。
 *   **動態等待機制**：自動偵測頁面狀態，待輸入框與送出按鈕就緒後自動執行。
 *   **備援發送**：若無法定位送出按鈕，會嘗試模擬 Enter 鍵發送，提升成功率。
+*   **模組化架構**：程式碼採用模組化設計，邏輯清晰，易於維護與擴充。
 
 ## 安裝
 
-### 步驟 1：建立擴充功能 (如果尚未建立)
+### 步驟 1：下載專案
 
-確保您的專案資料夾 (`d:\Projects\GeminiExtension`) 中包含以下檔案：
-*   `manifest.json`
-*   `content.js`
+從 GitHub 下載或 clone 本專案：
+```bash
+git clone https://github.com/gtli1452/gemini-flow-launcher.git
+```
+
+或直接下載 ZIP 檔案並解壓縮到您選擇的資料夾。
 
 ### 步驟 2：安裝到瀏覽器 (Chrome / Edge)
 
 1.  開啟瀏覽器，在網址列輸入 `chrome://extensions` (Edge 請輸入 `edge://extensions`)。
 2.  開啟右上角的 **「開發人員模式」 (Developer mode)**。
 3.  點擊左上角的 **「載入未封裝項目」 (Load unpacked)**。
-4.  選擇您的專案資料夾 (`d:\Projects\GeminiExtension`)。
+4.  選擇您剛才下載或 clone 的專案資料夾。
 
 ## 整合到 Flow Launcher
 
@@ -39,3 +43,18 @@
 *   **Prompt 無反應**：為確保安全，程式碼會驗證 `prompt` 參數。請確保傳遞的是純文字且長度在 10,000 字以內。
 *   **手動重新整理**：如果擴充功能沒有運作，請嘗試在擴充功能管理頁面點擊 **重新整理 (Refresh)** 按鈕，或重新載入 Gemini 頁面。
 *   **DOM 結構變更**：Google 定期更新介面，若自動填入失效，可能需要更新 `content.js` 中的選擇器。本版本已包含降級 (fallback) 選擇器以增加相容性。
+
+## 技術特色
+
+*   **Manifest V3**：遵循 Chrome 擴充功能最新標準。
+*   **模組化設計**：程式碼結構清晰，函式職責單一，易於測試與維護。
+*   **多選擇器支援**：支援多語系介面的送出按鈕偵測（英文、繁體中文）。
+*   **容錯機制**：提供多種輸入框與送出方式的備援方案。
+
+## 授權
+
+本專案採用 MIT 授權條款。詳見 LICENSE 檔案。
+
+## 貢獻
+
+歡迎提交 Issue 或 Pull Request 來協助改進此專案。

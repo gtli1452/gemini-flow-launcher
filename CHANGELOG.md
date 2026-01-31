@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refactored content script code structure for better maintainability
+  - Extracted logic into independent functions: `getPromptFromUrl`, `findInputBox`, `findSendButton`, `setInputValue`, `waitForButtonReady`, `sendWithEnter`
+  - Extracted button selectors and log prefix as constants (`SEND_BUTTON_SELECTORS`, `LOG_PREFIX`)
+  - Unified log format using template strings
+  - Added `isButtonUsable` helper function to simplify button state checks
+  - Improved code flow and reduced nesting structure
+
 ### Added
 - Initial changelog implementation
 
