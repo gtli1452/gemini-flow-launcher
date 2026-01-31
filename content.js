@@ -1,14 +1,25 @@
-function autoRun() {
+(() => {
     // 1. 解析網址參數
     const params = new URLSearchParams(window.location.search);
-    const promptText = params.get('prompt');
+    let promptText = params.get('prompt');
 
     // 如果沒有 prompt 參數，直接結束
-    if (!promptText) return;
+    if (!promptText || promptText.trim().length === 0) return;
+
+    // 2. 基本驗證與截斷
+    const MAX_PROMPT_LENGTH = 10000;
+    if (promptText.length > MAX_PROMPT_LENGTH) {
+        console.warn("[My Safe Gemini] Prompt 過長，已截斷");
+        promptText = promptText.substring(0, MAX_PROMPT_LENGTH);
+    }
 
     // 2. 定義尋找輸入框的邏輯
     const findInputBox = () => {
-        return document.querySelector('div[contenteditable="true"][role="textbox"]');
+        return (
+            document.querySelector('div[contenteditable="true"][role="textbox"]') ||
+            document.querySelector('textarea') ||
+            document.querySelector('[role="textbox"]')
+        );
     };
 
     // 3. 定義尋找送出按鈕的邏輯
@@ -31,8 +42,13 @@ function autoRun() {
     };
 
     // 4. 開始輪詢等待輸入框出現
+    const POLL_INTERVAL = 500; // 毫秒
+    const MAX_ATTEMPTS = 20; // 10秒
+    const UI_REACTION_DELAY = 300; // 毫秒
+    const SEND_RETRY_DELAY = 400; // 毫秒
+    const MAX_SEND_RETRIES = 3;
+
     let attempts = 0;
-    const maxAttempts = 20; // 10秒
 
     const intervalId = setInterval(() => {
         const inputBox = findInputBox();
@@ -43,7 +59,7 @@ function autoRun() {
 
             // --- 步驟 A: 填入文字 ---
             inputBox.focus();
-            document.execCommand('insertText', false, promptText);
+            inputBox.textContent = promptText;
 
             // 強制觸發 input 事件，確保 UI 框架知道內容變了
             inputBox.dispatchEvent(new Event('input', { bubbles: true }));
@@ -52,7 +68,7 @@ function autoRun() {
 
             // --- 步驟 B: 等待按鈕變亮並點擊 ---
             // 給 UI 一點時間反應 (300ms)
-            setTimeout(() => {
+            const trySend = (retryCount) => {
                 const sendBtn = findSendButton();
                 if (sendBtn) {
                     sendBtn.click();
@@ -61,17 +77,22 @@ function autoRun() {
                     // (選用) 清除網址參數，避免重新整理頁面時重複發送
                     // const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                     // window.history.replaceState({path: newUrl}, '', newUrl);
-                } else {
-                    console.warn("[My Safe Gemini] 找不到送出按鈕，或按鈕仍被停用。");
+                    return;
                 }
-            }, 300); // 延遲 0.3 秒
 
-        } else if (attempts >= maxAttempts) {
+                if (retryCount < MAX_SEND_RETRIES) {
+                    setTimeout(() => trySend(retryCount + 1), SEND_RETRY_DELAY);
+                    return;
+                }
+
+                console.error("[My Safe Gemini] 發送失敗：按鈕未找到或仍被停用。");
+            };
+
+            setTimeout(() => trySend(0), UI_REACTION_DELAY); // 延遲 0.3 秒
+
+        } else if (attempts >= MAX_ATTEMPTS) {
             clearInterval(intervalId);
             console.log("[My Safe Gemini] 超時：找不到輸入框。");
         }
-    }, 500);
-}
-
-// 執行
-autoRun();
+    }, POLL_INTERVAL);
+})();

@@ -3,6 +3,12 @@
     "name": "My Safe Gemini Prompt",
     "version": "1.0",
     "description": "自動從 URL 讀取 prompt 參數並填入 Gemini。",
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://gemini.google.com/*"
+    ],
     "content_scripts": [
         {
             "matches": [
