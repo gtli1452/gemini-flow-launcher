@@ -4,13 +4,22 @@
     let promptText = params.get('prompt');
 
     // 如果沒有 prompt 參數，直接結束
-    if (!promptText || promptText.trim().length === 0) return;
+    if (!promptText || typeof promptText !== 'string') return;
 
     // 2. 基本驗證與截斷
-    const MAX_PROMPT_LENGTH = 10000;
-    if (promptText.length > MAX_PROMPT_LENGTH) {
-        console.warn("[My Safe Gemini] Prompt 過長，已截斷");
-        promptText = promptText.substring(0, MAX_PROMPT_LENGTH);
+    const CONFIG = {
+        MAX_PROMPT_LENGTH: 10000,
+        MAX_POLLING_ATTEMPTS: 20,
+        POLL_INTERVAL_MS: 500,
+        BUTTON_READY_MAX_WAIT_MS: 5000,
+        BUTTON_READY_POLL_INTERVAL_MS: 100
+    };
+
+    promptText = promptText.trim();
+    if (promptText.length === 0) return;
+    if (promptText.length > CONFIG.MAX_PROMPT_LENGTH) {
+        console.warn("[My Safe Gemini] Prompt 過長，已拒絕處理");
+        return;
     }
 
     // 2. 定義尋找輸入框的邏輯
@@ -42,12 +51,6 @@
     };
 
     // 4. 開始輪詢等待輸入框出現
-    const POLL_INTERVAL = 500; // 毫秒
-    const MAX_ATTEMPTS = 20; // 10秒
-    const UI_REACTION_DELAY = 300; // 毫秒
-    const SEND_RETRY_DELAY = 400; // 毫秒
-    const MAX_SEND_RETRIES = 3;
-
     let attempts = 0;
 
     const intervalId = setInterval(() => {
@@ -59,7 +62,13 @@
 
             // --- 步驟 A: 填入文字 ---
             inputBox.focus();
-            inputBox.textContent = promptText;
+
+            if (inputBox.tagName === 'TEXTAREA') {
+                inputBox.value = promptText;
+            } else {
+                inputBox.textContent = '';
+                inputBox.appendChild(document.createTextNode(promptText));
+            }
 
             // 強制觸發 input 事件，確保 UI 框架知道內容變了
             inputBox.dispatchEvent(new Event('input', { bubbles: true }));
@@ -67,32 +76,58 @@
             console.log("[My Safe Gemini] 文字已填入，準備點擊送出...");
 
             // --- 步驟 B: 等待按鈕變亮並點擊 ---
-            // 給 UI 一點時間反應 (300ms)
-            const trySend = (retryCount) => {
-                const sendBtn = findSendButton();
+            const waitForButtonReady = (maxWait = CONFIG.BUTTON_READY_MAX_WAIT_MS) => {
+                return new Promise((resolve) => {
+                    const startTime = Date.now();
+
+                    const checkButton = () => {
+                        const sendBtn = findSendButton();
+                        if (sendBtn) {
+                            resolve(sendBtn);
+                            return;
+                        }
+
+                        if (Date.now() - startTime < maxWait) {
+                            setTimeout(checkButton, CONFIG.BUTTON_READY_POLL_INTERVAL_MS);
+                            return;
+                        }
+
+                        resolve(null);
+                    };
+
+                    checkButton();
+                });
+            };
+
+            void (async () => {
+                const sendBtn = await waitForButtonReady();
                 if (sendBtn) {
                     sendBtn.click();
                     console.log("[My Safe Gemini] 已自動送出！");
-
-                    // (選用) 清除網址參數，避免重新整理頁面時重複發送
-                    // const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                    // window.history.replaceState({path: newUrl}, '', newUrl);
                     return;
                 }
 
-                if (retryCount < MAX_SEND_RETRIES) {
-                    setTimeout(() => trySend(retryCount + 1), SEND_RETRY_DELAY);
-                    return;
-                }
+                console.warn("[My Safe Gemini] 找不到送出按鈕，嘗試以 Enter 送出。");
+                inputBox.focus();
+                inputBox.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Enter',
+                    code: 'Enter',
+                    bubbles: true
+                }));
+                inputBox.dispatchEvent(new KeyboardEvent('keyup', {
+                    key: 'Enter',
+                    code: 'Enter',
+                    bubbles: true
+                }));
+            })();
 
-                console.error("[My Safe Gemini] 發送失敗：按鈕未找到或仍被停用。");
-            };
-
-            setTimeout(() => trySend(0), UI_REACTION_DELAY); // 延遲 0.3 秒
-
-        } else if (attempts >= MAX_ATTEMPTS) {
+        } else if (attempts >= CONFIG.MAX_POLLING_ATTEMPTS) {
             clearInterval(intervalId);
             console.log("[My Safe Gemini] 超時：找不到輸入框。");
         }
-    }, POLL_INTERVAL);
+    }, CONFIG.POLL_INTERVAL_MS);
+
+    window.addEventListener('beforeunload', () => {
+        clearInterval(intervalId);
+    });
 })();
