@@ -1,87 +1,184 @@
-# Gemini Chrome Extension - Copilot Instructions
+# GitHub Copilot 指南 - Chrome 擴充功能開發 (Manifest V3)
 
-## Project Overview
+## 概述
+本指南提供使用 GitHub Copilot 開發 Chrome 擴充功能的最佳實踐，專注於 Manifest V3 標準。
 
-這是一個 Chrome/Edge Manifest V3 擴充功能，用於透過 URL `prompt` 參數自動填入並送出 Google Gemini 查詢。主要整合 Flow Launcher 使用。
+## 核心原則
 
-## Architecture
+### 1. Manifest V3 結構
+- 使用 `manifest.json` 作為主要設定檔案
+- 採用 Service Worker 取代背景頁面
+- 實作 Host Permissions 和 Active Tab 權限模型
+- 使用 Chrome Extensions API v3
 
+### 2. 檔案結構最佳實踐
 ```
-content.js      # 核心 content script - 所有邏輯都在這裡
-manifest.json   # MV3 擴充功能設定
+chrome-extension/
+├── manifest.json          # 擴充功能設定檔案
+├── background/
+│   └── service-worker.js  # Service Worker 程式碼
+├── content/
+│   └── content-script.js  # 內容腳本
+├── popup/
+│   ├── popup.html         # 彈出視窗 HTML
+│   ├── popup.js           # 彈出視窗邏輯
+│   └── popup.css          # 彈出視窗樣式
+├── options/
+│   ├── options.html       # 選項頁面 HTML
+│   ├── options.js         # 選項頁面邏輯
+│   └── options.css        # 選項頁面樣式
+├── _locales/              # 多語系資料夾
+│   └── zh_TW/             # 繁體中文語系
+│       └── messages.json  # 語系訊息檔案
+└── assets/
+  └── icons/             # 圖示檔案
 ```
 
-單檔架構：所有功能封裝在 `content.js` 的 IIFE 中，無外部相依套件。
+### 3. 程式碼產生指導原則
 
-## Key Patterns
+#### Manifest.json 範例
+```json
+{
+  "manifest_version": 3,
+  "name": "擴充功能名稱",
+  "version": "1.0.0",
+  "description": "擴充功能描述",
+  "permissions": ["storage", "activeTab"],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content/content-script.js"]
+  }],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  }
+}
+```
 
-### DOM 輪詢策略 (content.js)
-使用 `setInterval` + 計數器模式等待動態載入的 DOM 元素：
+#### Service Worker 最佳實踐
+- 使用事件監聽器模式
+- 實作非同步處理
+- 妥善處理擴充功能生命週期
+- 使用 chrome.storage API 儲存資料
+
+#### 內容腳本指導原則
+- 避免污染頁面的全域命名空間
+- 使用訊息通訊與背景腳本互動
+- 實作 DOM 操作時確保效能
+- 處理動態載入的內容
+
+### 4. API 使用優先順序
+
+#### 儲存 API
+- 優先使用 `chrome.storage.local`
+- 對於同步資料使用 `chrome.storage.sync`
+- 實作錯誤處理和資料驗證
+
+#### 權限管理
+- 使用最小權限原則
+- 實作動態權限請求
+- 處理權限被拒絕的情況
+
+#### 訊息通訊
+- 使用 `chrome.runtime.sendMessage ()` 進行通訊
+- 實作適當的訊息路由
+- 處理連接中斷情況
+
+### 5. 安全性考量
+- 內容安全政策 (CSP) 合規
+- 避免使用 `eval ()` 和內聯腳本
+- 驗證所有外部輸入
+- 使用 HTTPS 進行網路請求
+
+### 6. 效能最佳化
+- 延遲載入非關鍵資源
+- 最小化記憶體使用
+- 實作適當的快取策略
+- 避免長時間執行的任務
+
+### 7. 測試和除錯
+
+#### 測試策略
+- 單元測試覆蓋核心邏輯
+- 整合測試驗證 API 互動
+- 跨瀏覽器相容性測試
+- 效能和記憶體洩漏測試
+
+#### 除錯工具
+- 使用 Chrome DevTools 擴充功能頁面
+- 利用 Service Worker 除錯工具
+- 實作詳細的錯誤記錄
+- 使用 `console.log` 進行開發階段除錯
+
+### 8. 發布和維護
+
+#### 版本管理
+- 遵循語意化版本控制
+- 維護變更記錄
+- 實作向後相容性
+- 準備遷移計畫
+
+#### Chrome Web Store 準備
+- 最佳化商店列表
+- 準備螢幕截圖和描述
+- 遵循商店政策
+- 實作使用者回饋機制
+
+### 9. 常見模式和範例
+
+#### 彈出視窗互動
 ```javascript
-const intervalId = setInterval(() => {
-    const element = findElement();
-    if (element || attempts >= MAX_ATTEMPTS) clearInterval(intervalId);
-}, POLL_INTERVAL_MS);
+//popup.js
+document.addEventListener ('DOMContentLoaded', async () => {
+  const data = await chrome.storage.local.get ('key');
+  // 更新 UI
+});
 ```
 
-### 多語系選擇器 Fallback
-Gemini UI 有中英文版本，選擇器必須涵蓋兩者：
+#### 內容腳本注入
 ```javascript
-'button[aria-label="Send message"]'  // 英文
-'button[aria-label="傳送訊息"]'       // 中文
+//service-worker.js
+chrome.action.onClicked.addListener (async (tab) => {
+  await chrome.scripting.executeScript ({
+    target: { tabId: tab.id },
+    files: ['content/content-script.js']
+  });
+});
 ```
 
-### 安全考量
-- 使用 `createTextNode()` 而非 `innerHTML` 防止 XSS
-- `CONFIG.MAX_PROMPT_LENGTH` 限制輸入長度 (10000 字)
-- CSP 設定在 `manifest.json`
+### 10. 故障排除指南
 
-## Configuration (content.js)
+#### 常見問題
+- Service Worker 非活動狀態處理
+- 內容腳本注入失敗
+- 權限不足錯誤
+- 跨來源請求問題
 
-修改行為時調整 `CONFIG` 物件：
-```javascript
-const CONFIG = {
-    MAX_PROMPT_LENGTH: 10000,        // prompt 最大長度
-    MAX_POLLING_ATTEMPTS: 20,        // 最大輪詢次數
-    POLL_INTERVAL_MS: 500,           // 輪詢間隔
-    BUTTON_READY_MAX_WAIT_MS: 5000,  // 按鈕等待超時
-    BUTTON_READY_POLL_INTERVAL_MS: 100
-};
-```
+#### 解決方案模式
+- 實作重試機制
+- 使用適當的錯誤處理
+- 提供使用者友善的錯誤訊息
+- 記錄詳細的除錯資訊
 
-## Development Workflow
+---
 
-### 安裝到瀏覽器測試
-1. 開啟 `chrome://extensions` 或 `edge://extensions`
-2. 啟用「開發人員模式」
-3. 點擊「載入未封裝項目」選擇專案資料夾
+## 程式碼產生提示
 
-### 測試 URL 格式
-```
-https://gemini.google.com/app?prompt=測試訊息
-```
+當使用 GitHub Copilot 時，請提供具體的上下文和需求：
+- 指定 Manifest V3 相容性
+- 說明預期的使用者互動流程
+- 描述需要的權限和 API
+- 提及效能和安全性要求
 
-### 偵錯
-開啟 Gemini 頁面的 DevTools Console，搜尋 `[My Safe Gemini]` 前綴的 log。
-
-## When Modifying Code
-
-1. **選擇器失效時**：Google 會更新 Gemini UI，需更新 `findInputBox()` 和 `findSendButton()` 中的選擇器
-2. **新增語系支援**：在 `findSendButton()` 的 `selectors` 陣列新增對應 `aria-label`
-3. **調整超時**：修改 `CONFIG` 物件，不要硬編碼數值
-
-## Naming Conventions
-
-- Console log 統一使用 `[My Safe Gemini]` 前綴
-- 函式命名：`findXxx()` 用於 DOM 查詢，`waitForXxx()` 用於 Promise-based 等待
-
-## Selector Change History
-
-當 Google 更新 Gemini UI 導致選擇器失效時，請在此記錄變更：
-
-| 日期 | 變更項目 | 舊選擇器 | 新選擇器 | 備註 |
-|------|----------|----------|----------|------|
-| 2026-01-31 | 初始版本 | - | - | 建立選擇器變更記錄機制 |
+範例提示：
+"建立一個 Manifest V3 Chrome 擴充功能，用於在網頁上高亮顯示文字，需要內容腳本和彈出視窗介面"
 
 ## Conventions
 
