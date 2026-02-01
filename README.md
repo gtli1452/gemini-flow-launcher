@@ -56,4 +56,4 @@ git clone https://github.com/gtli1452/gemini-flow-launcher.git
 
 ## 授權
 
-本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 檔案（如有）。
+本專案採用 MIT 授權 - 詳見 LICENSE 檔案（如有）。

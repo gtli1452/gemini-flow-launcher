@@ -4,6 +4,16 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.0.0/)，並且本專案遵循 [語意化版本](https://semver.org/lang/zh-TW/)。
 
+## [未發布]
+
+### 新增
+
+### 改進
+
+### 修正
+
+### 安全性
+
 ## [0.1.0] - 2026-01-31
 
 初始版本發布
@@ -55,4 +65,5 @@
 - **廢棄**: 即將移除的功能
 
 <!-- 版本連結 -->
+[未發布]: https://github.com/gtli1452/gemini-flow-launcher/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/gtli1452/gemini-flow-launcher/releases/tag/v0.1.0
