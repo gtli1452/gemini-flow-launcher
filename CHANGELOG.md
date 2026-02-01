@@ -1,39 +1,69 @@
-# Changelog
+# 變更日誌
 
-All notable changes to this project will be documented in this file.
+所有重要變更都會記錄在此檔案中。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式基於 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.0.0/)，並且本專案遵循 [語意化版本](https://semver.org/lang/zh-TW/)。
 
-## [Unreleased]
+## [未發布]
 
-### Added
-- Initial changelog implementation
+### 新增
 
-### Security
-- Security audit completed
-- Existing security features verified:
-  - Input validation and sanitization with length limits (max 10,000 characters)
-  - XSS protection using `createTextNode` for safe text insertion
-  - Content Security Policy (CSP) configured in manifest
-  - Type checking for prompt parameters
-  - Strict input validation before processing
+### 改進
 
-## [1.0.0] - 2026-01-31
+### 修正
 
-### Added
-- Chrome/Edge extension for Flow Launcher integration with Google Gemini
-- Auto-fill prompt from URL parameters
-- Auto-submit functionality with dynamic waiting mechanism
-- Fallback send mechanism using Enter key simulation
-- Multi-language support (English and Chinese)
+### 安全性
 
-### Security
-- Implemented strict input validation and filtering
-- Used `createTextNode` for safe text insertion to prevent XSS attacks
-- Integrated Content Security Policy (CSP)
-- Maximum prompt length enforcement (10,000 characters)
-- Input type validation and trimming
+## [0.1.0] - 2026-01-31
 
-[Unreleased]: https://github.com/gtli1452/gemini-flow-launcher/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/gtli1452/gemini-flow-launcher/releases/tag/v1.0.0
+初始版本發布
+
+### 新增
+
+- Flow Launcher 與 Google Gemini 整合的 Chrome/Edge 擴充功能
+- 從 URL 參數自動填入提示詞
+- 具有動態等待機制的自動送出功能
+- 使用 Enter 鍵模擬的備援發送機制
+- 多語言支援（英文與繁體中文）
+- Manifest V3 架構
+- 動態頁面偵測的內容腳本
+
+### 安全性
+
+- 實作嚴格的輸入驗證與過濾
+- 使用 `createTextNode` 進行安全文字插入以防止 XSS 攻擊
+- 整合內容安全政策（CSP）
+- 最大提示詞長度限制（10,000 字元）
+- 輸入型別驗證與去除空白
+
+### 技術規格
+
+- 符合 Manifest V3 規範
+- 支援 Gemini URL 參數處理
+- 具有重試機制的動態元素偵測
+- 提供備援輸入機制以確保可靠性
+
+---
+
+## 版本說明
+
+### 版本號格式
+
+我們使用語意化版本號: `主版本.次版本.修訂版本`
+
+- **主版本**: 不相容的 API 變更
+- **次版本**: 新增功能但向後相容
+- **修訂版本**: 向後相容的錯誤修正
+
+### 變更類型
+
+- **新增**: 新功能
+- **改進**: 現有功能的改善
+- **修正**: 錯誤修正
+- **安全性**: 安全性相關的修正
+- **移除**: 移除的功能
+- **廢棄**: 即將移除的功能
+
+<!-- 版本連結 -->
+[未發布]: https://github.com/gtli1452/gemini-flow-launcher/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/gtli1452/gemini-flow-launcher/releases/tag/v0.1.0
