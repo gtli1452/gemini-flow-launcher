@@ -48,7 +48,7 @@ git clone https://github.com/gtli1452/gemini-flow-launcher.git
 
 ## 版本歷史
 
-請參閱 [CHANGELOG.md](CHANGELOG.md) 或 [CHANGELOG.zh-TW.md](CHANGELOG.zh-TW.md) 了解詳細的版本變更記錄。
+請參閱 [CHANGELOG.zh-TW.md](CHANGELOG.zh-TW.md) 了解詳細的版本變更記錄。
 
 ## 貢獻
 
